@@ -1,0 +1,1 @@
+Chuck Hu <jiabih@uw.edu> A basic game of tic-tac-toe, where two players take turns pressing buttons in a 3x3 grid. If any player can place three of their letters/icon in a row horizontally, vertically, or diagonally, that player wins the game.

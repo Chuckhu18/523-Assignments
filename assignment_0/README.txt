@@ -1,0 +1,1 @@
+Chuck Hu <jiabih@uw.edu> Rock-Paper-Scissors: The user and computer each pick an option: Rock, Paper, or Scissors. The computer's choice is made randomly. The rules are the following: Paper beats Rock; Scissors beat Paper; and Rock beats Scissors. The app should keep track of the user player's score against the computer over time.
