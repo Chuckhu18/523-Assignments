@@ -14,55 +14,35 @@
         android:onClick="clearDrawL"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.01"
+        app:layout_constraintHorizontal_bias="0.305"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.015" />
+        app:layout_constraintVertical_bias="0.100000024" />
 
     <com.divyanshu.draw.widget.DrawView
         android:id="@+id/imageViewRight"
         android:layout_width="177dp"
         android:layout_height="220dp"
+        android:background="@color/color_black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.99"
+        app:layout_constraintHorizontal_bias="0.709"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.015"
-        android:background="@color/color_black"/>
+        app:layout_constraintVertical_bias="0.100000024" />
 
     <Button
         android:id="@+id/take_pic1"
         android:layout_width="110dp"
         android:layout_height="40dp"
+        android:layout_marginEnd="20dp"
         android:onClick="startCameraIntentForResult_L"
         android:text="Take Pic1"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewLeft"
-        app:layout_constraintStart_toStartOf="@+id/imageViewLeft"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewLeft"
-        app:layout_constraintVertical_bias="0.063" />
-
-    <Button
-        android:id="@+id/select_pic"
-        android:layout_width="110dp"
-        android:layout_height="40dp"
-        android:onClick="startChooseImageIntentForResult_L"
-        android:text="Select Pic1"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/take_pic1"
-        app:layout_constraintTop_toBottomOf="@+id/take_pic1" />
-
-    <Button
-        android:id="@+id/select_pic2"
-        android:layout_width="110dp"
-        android:layout_height="40dp"
-        android:onClick="startChooseImageIntentForResult_R"
-        android:text="Select Pic2"
-        android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/take_pic2"
-        app:layout_constraintTop_toBottomOf="@+id/take_pic2" />
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewLeft"
+        app:layout_constraintEnd_toStartOf="@+id/imageViewLeft"
+        app:layout_constraintTop_toTopOf="@+id/imageViewLeft"
+        app:layout_constraintVertical_bias="0.166" />
 
     <Button
         android:id="@+id/bu_blur1"
@@ -85,27 +65,27 @@
         app:layout_constraintTop_toBottomOf="@+id/bu_blur1" />
 
     <Button
+        android:id="@+id/select_pic"
+        android:layout_width="110dp"
+        android:layout_height="40dp"
+        android:onClick="startChooseImageIntentForResult_L"
+        android:text="Select Pic1"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/take_pic1"
+        app:layout_constraintTop_toBottomOf="@+id/take_pic1" />
+
+    <Button
         android:id="@+id/take_pic2"
         android:layout_width="110dp"
         android:layout_height="40dp"
+        android:layout_marginStart="20dp"
         android:onClick="startCameraIntentForResult_R"
         android:text="Take Pic2"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/imageViewRight"
-        app:layout_constraintStart_toStartOf="@+id/imageViewRight"
-        app:layout_constraintTop_toBottomOf="@+id/imageViewRight"
-        app:layout_constraintVertical_bias="0.063"
-        android:textStyle="bold" />
-
-    <Button
-        android:id="@+id/bu_blur2"
-        android:layout_width="110dp"
-        android:layout_height="40dp"
-        android:onClick="blurImageR"
-        android:text="Blur"
         android:textStyle="bold"
-        app:layout_constraintStart_toStartOf="@+id/select_pic2"
-        app:layout_constraintTop_toBottomOf="@+id/select_pic2" />
+        app:layout_constraintBottom_toBottomOf="@+id/imageViewRight"
+        app:layout_constraintStart_toEndOf="@+id/imageViewRight"
+        app:layout_constraintTop_toTopOf="@+id/imageViewRight"
+        app:layout_constraintVertical_bias="0.166" />
 
     <Button
         android:id="@+id/bu_clean2"
@@ -118,14 +98,55 @@
         app:layout_constraintTop_toBottomOf="@+id/bu_blur2" />
 
     <Button
+        android:id="@+id/bu_blur2"
+        android:layout_width="110dp"
+        android:layout_height="40dp"
+        android:onClick="blurImageR"
+        android:text="Blur"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/select_pic2"
+        app:layout_constraintTop_toBottomOf="@+id/select_pic2" />
+
+    <Button
+        android:id="@+id/select_pic2"
+        android:layout_width="110dp"
+        android:layout_height="40dp"
+        android:onClick="startChooseImageIntentForResult_R"
+        android:text="Select Pic2"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/take_pic2"
+        app:layout_constraintTop_toBottomOf="@+id/take_pic2" />
+
+    <Button
         android:id="@+id/bu_swap"
         android:layout_width="110dp"
         android:layout_height="50dp"
         android:text="Swap faces"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/imageViewRight"
+        app:layout_constraintHorizontal_bias="0.485"
+        app:layout_constraintStart_toStartOf="@+id/imageViewLeft"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.849" />
+        app:layout_constraintVertical_bias="0.955" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Select/Take a Picture"
+        app:layout_constraintEnd_toEndOf="@+id/bu_clean1"
+        app:layout_constraintStart_toStartOf="@+id/bu_clean1"
+        app:layout_constraintTop_toBottomOf="@+id/bu_clean1" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Select/Take a Picture"
+        app:layout_constraintEnd_toEndOf="@+id/bu_clean2"
+        app:layout_constraintStart_toStartOf="@+id/bu_clean2"
+        app:layout_constraintTop_toBottomOf="@+id/bu_clean2" />
 </androidx.constraintlayout.widget.ConstraintLayout>

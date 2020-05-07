@@ -42,7 +42,7 @@
         app:layout_constraintEnd_toEndOf="@+id/imageViewLeft"
         app:layout_constraintStart_toStartOf="@+id/imageViewLeft"
         app:layout_constraintTop_toBottomOf="@+id/imageViewLeft"
-        app:layout_constraintVertical_bias="0.063" />
+        app:layout_constraintVertical_bias="0.04000002" />
 
     <Button
         android:id="@+id/select_pic"
@@ -90,12 +90,12 @@
         android:layout_height="40dp"
         android:onClick="startCameraIntentForResult_R"
         android:text="Take Pic2"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/imageViewRight"
         app:layout_constraintStart_toStartOf="@+id/imageViewRight"
         app:layout_constraintTop_toBottomOf="@+id/imageViewRight"
-        app:layout_constraintVertical_bias="0.063"
-        android:textStyle="bold" />
+        app:layout_constraintVertical_bias="0.04000002" />
 
     <Button
         android:id="@+id/bu_blur2"
@@ -120,12 +120,32 @@
     <Button
         android:id="@+id/bu_swap"
         android:layout_width="110dp"
-        android:layout_height="50dp"
+        android:layout_height="40dp"
+        android:onClick="OnClickSwipFace"
         android:text="Swap faces"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.849" />
+        app:layout_constraintEnd_toEndOf="@+id/bu_clean2"
+        app:layout_constraintHorizontal_bias="0.495"
+        app:layout_constraintStart_toStartOf="@+id/bu_clean1"
+        app:layout_constraintTop_toBottomOf="@+id/bu_clean1" />
+
+    <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Select/Take a Picture"
+        app:layout_constraintEnd_toEndOf="@+id/bu_clean1"
+        app:layout_constraintStart_toStartOf="@+id/bu_clean1"
+        app:layout_constraintTop_toBottomOf="@+id/bu_swap" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Select/Take a Picture"
+        app:layout_constraintEnd_toEndOf="@+id/bu_clean2"
+        app:layout_constraintStart_toStartOf="@+id/bu_clean2"
+        app:layout_constraintTop_toBottomOf="@+id/bu_swap" />
 </androidx.constraintlayout.widget.ConstraintLayout>

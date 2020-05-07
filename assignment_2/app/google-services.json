@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "917376798707-8janul5jmjllqrmr1rvf6a55mnbi794j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.uw.eep523.assignment_2",
+            "certificate_hash": "9d17b7738ab2f1e574e46122df50c17d9512a838"
+          }
+        },
+        {
           "client_id": "917376798707-g35rrecc5mcnv4lp6rjadgre0qn8smub.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

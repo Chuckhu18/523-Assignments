@@ -7,19 +7,24 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Parcelable
+import kotlinx.android.parcel. Parcelize
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.get
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 import java.util.ArrayList
@@ -31,15 +36,27 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceContour
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark
 
+//@Parcelize class Book(val title:String, val author:String, val year:Int):Parcelable
+//@Parcelize class img(val title:String, val author:String, val year:Int):Parcelable
+
 class MainActivity : AppCompatActivity() {
 
     private var isLandScape: Boolean = false
     private var imageUri: Uri? = null
     private var imageUri2: Uri? = null
+    private lateinit var global_face1: FirebaseVisionFace
+    private lateinit var global_face2 :FirebaseVisionFace
+    private var enableBu = 0
+//    private var bitmapL: Bitmap? = null
+//    private var bitmapR: Bitmap? = null
+    lateinit var bitmapL: Bitmap
+    lateinit var bitmapR: Bitmap
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        bu_swap.isEnabled = false
 
         getRuntimePermissions()
         if (!allPermissionsGranted()) {
@@ -50,6 +67,27 @@ class MainActivity : AppCompatActivity() {
         savedInstanceState?.let {
             imageUri = it.getParcelable(KEY_IMAGE_URI)
             imageUri2 = it.getParcelable(KEY_IMAGE_URI1)
+        }
+
+    }
+
+    public override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        with(outState) {
+            putParcelable(KEY_IMAGE_URI, imageUri)
+            putParcelable(KEY_IMAGE_URI1, imageUri2)
+            Log.i("TAG", "onSaveInstanceState")
+        }
+//        outState.putParcelable(KEY_IMAGE_URI, imageUri)
+//        Log.i("TAG", "onSaveInstanceState")
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        if(savedInstanceState != null){
+//            savedInstanceState.getParcelableArray(KEY_IMAGE_URI)
+            savedInstanceState.getParcelable<Bundle>(KEY_IMAGE_URI)
+//            savedInstanceState.getParcelable<Bundle>(KEY_IMAGE_URI1)
+            Log.i("TAG", "onRestoreInstanceState")
         }
     }
 
@@ -101,22 +139,13 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-
-    public override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        with(outState) {
-            putParcelable(KEY_IMAGE_URI, imageUri)
-            putParcelable(KEY_IMAGE_URI1, imageUri2)
-        }
-    }
-
     fun startCameraIntentForResult_L(view: View) {
         // Clean up last time's image
         imageUri = null
         imageUri2 = null
 //        imageViewLeft?.setImageBitmap(null)
 //        imageViewLeft?.background = BitmapDrawable(resources, null)
-
+        textView1.text=("Loading...")
         // Take picture and add to gallery
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         takePictureIntent.resolveActivity(packageManager)?.let {
@@ -135,7 +164,7 @@ class MainActivity : AppCompatActivity() {
         imageUri2 = null
 //        imageViewLeft?.setImageBitmap(null)
 //        imageViewRight?.setImageBitmap(null)
-
+        textView2.text=("Loading...")
         // Take picture and add to gallery
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         takePictureIntent.resolveActivity(packageManager)?.let {
@@ -149,14 +178,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startChooseImageIntentForResult_L(view: View) {
+        textView1.text=("Loading...")
         val intent = Intent()
         intent.type = "image/*"
         intent.action = Intent.ACTION_GET_CONTENT
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_CHOOSE_IMAGE_L)
+
     }
 
     fun startChooseImageIntentForResult_R(view: View) {
-
+        textView2.text=("Loading...")
         val intent = Intent()
         intent.type = "image/*"
         intent.action = Intent.ACTION_GET_CONTENT
@@ -173,15 +204,19 @@ class MainActivity : AppCompatActivity() {
             imageUri = data!!.data
             val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
             imageViewLeft?.background= BitmapDrawable(resources,imageBitmap)
-
+            bitmapL = imageBitmap
+            runDetector(bitmapL, 0)
 //            tryReloadAndDetectInImage(0)
         } else if (requestCode == REQUEST_IMAGE_CAPTURE_R && resultCode == Activity.RESULT_OK) {
             tryReloadAndDetectInImage(imageUri2,1)
+//            imageUri2 = data!!.data
         } else if (requestCode == REQUEST_CHOOSE_IMAGE_R && resultCode == Activity.RESULT_OK) {
             // In this case, imageUri is returned by the chooser, save it.
             imageUri2 = data!!.data
             val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri2)
             imageViewRight?.background= BitmapDrawable(resources,imageBitmap)
+            bitmapR = imageBitmap
+            runDetector(bitmapR, 1)
 //            tryReloadAndDetectInImage(1)
         }
     }
@@ -198,10 +233,16 @@ class MainActivity : AppCompatActivity() {
                 ImageDecoder.decodeBitmap(source)
             }
 //                imageViewLeft?.setImageBitmap(imageBitmap) //previewPane is the ImageView from the layout
-            if(status == 0)
-                imageViewLeft?.background= BitmapDrawable(resources,imageBitmap)
-            if(status == 1)
-                imageViewRight?.background= BitmapDrawable(resources,imageBitmap)
+            if(status == 0) {
+                bitmapL = imageBitmap
+                imageViewLeft?.background = BitmapDrawable(resources, imageBitmap)
+            }
+            if(status == 1) {
+                bitmapR = imageBitmap
+                imageViewRight?.background = BitmapDrawable(resources, imageBitmap)
+            }
+
+            runDetector(imageBitmap, status)
 
         } catch (e: IOException) {
         }
@@ -212,9 +253,10 @@ class MainActivity : AppCompatActivity() {
             if (imageUri == null) {
                 return
             }
-            val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
-            imageViewLeft?.background = BitmapDrawable(resources, bitmapBlur(imageBitmap, 0.3f, 50))
-//            Log.d("aaaaaaaaaaa","bbbbbbbbbbbb")
+            val blurBm = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+//            val blurBm = bitmapL
+            imageViewLeft?.background = BitmapDrawable(resources, bitmapBlur(blurBm, 0.3f, 50))
+            textView1.text=("Blur")
         }
         catch(e: IOException) {}
     }
@@ -224,77 +266,180 @@ class MainActivity : AppCompatActivity() {
             if (imageUri2 == null) {
                 return
             }
-            val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri2)
-            imageViewRight?.background = BitmapDrawable(resources, bitmapBlur(imageBitmap, 0.3f, 50))
+//            val blurBm = MediaStore.Images.Media.getBitmap(contentResolver, imageUri2)
+//            val blurBm=bitmapR
+            imageViewRight?.background = BitmapDrawable(resources, bitmapBlur(bitmapR, 0.3f, 50))
+            textView2.text=("Blur")
         }
         catch(e: IOException) {}
     }
 
     fun clearDrawL(view:View){
         imageViewLeft.clearCanvas()
-        val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
-        imageViewLeft?.background = BitmapDrawable(resources, imageBitmap)
+//        val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+//        val imageBitmap = bitmapL
+        imageViewLeft?.background = BitmapDrawable(resources, bitmapL)
+        textView1.text=("Cleared")
     }
 
     fun clearDrawR(view:View){
         imageViewRight.clearCanvas()
-        val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri2)
-        imageViewRight?.background = BitmapDrawable(resources, imageBitmap)
-    }
-/*
-    fun swapFace(view:View){
-        val contour = face.getContour(FirebaseVisionFaceContour.ALL_POINTS)
-            for(point in contour.points ){
-                val px = point.x
-                val py = point.y
-            }
-
-        if(face.smilingProbability != FirebaseVisionFace.UNCOMPUTED_PROBABILITY)
-            val smileProb = face.smilingProbability
-        if(face.rightEyeOpenProbability != FirebaseVisionFace.UNCOMPUTED_PROBABILITY)
-            val rightEyeOpenProb = face.rightEyeOpenProbability
-
+//        val imageBitmap = MediaStore.Images.Media.getBitmap(contentResolver, imageUri2)
+//        val imageBitmap = bitmapL
+        imageViewRight?.background = BitmapDrawable(resources, bitmapR)
+        textView2.text=("Cleared")
     }
 
-    private fun faceDetection () {
-        val mSelectedImage = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
-        val image = FirebaseVisionImage.fromBitmap(mSelectedImage)
+    private fun runDetector(bitmap: Bitmap, stat: Int){
+        Log.d("TAG","runing detector")
+        val image = FirebaseVisionImage.fromBitmap(bitmap)
         val options = FirebaseVisionFaceDetectorOptions.Builder()
             .setPerformanceMode(FirebaseVisionFaceDetectorOptions.FAST)
             .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
 //          .setContourMode(FirebaseVisionFaceDetectorOptions.ALL_CONTOURS)
             .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
-
-        val detector = FirebaseVision.getInstance().getVisionFaceDetector(options)
-            detector.detectInImage(image)
-                addOnSuccessListener { faces ->
-                    processFaces(faces)
-                }.addOnFailureListener { e -> // Task failed with an exception
-                    e.printStackTrace()
-                }
+            .build()
+        val detector =FirebaseVision.getInstance()
+            .getVisionFaceDetector(options)
+        detector.detectInImage(image)
+            .addOnSuccessListener { faces ->
+                processFaceResult(faces, stat)
+            }.addOnFailureListener {
+                it.printStackTrace()
+            }
     }
 
-    private fun processFaces(faces: List<FirebaseVisionFace>){
-        if (faces.size == 0){
+    fun OnClickSwipFace (view: View) {
+        Log.d("TAG","Swiping face")
+//        val bitmapL = MediaStore.Images.Media.getBitmap(contentResolver, imageUri)
+//        val bitmapR = MediaStore.Images.Media.getBitmap(contentResolver, imageUri2)
+
+        var bmL : Bitmap = bitmapL.copy(Bitmap.Config.ARGB_8888,true)
+        var bmR : Bitmap = bitmapR.copy(Bitmap.Config.ARGB_8888,true)
+
+//        val imageL = FirebaseVisionImage.fromBitmap(bitmapL)
+//        val imageR = FirebaseVisionImage.fromBitmap(bitmapR)
+
+//        val centerX = (global_face1.boundingBox.centerX().toInt())
+//        val centerY = (global_face1.boundingBox.centerY().toInt())
+//        Toast.makeText(this, "centerX=$centerX \ncenterY=$centerY", Toast.LENGTH_LONG).show()
+
+        val faceT = (global_face1.boundingBox.top)
+        val faceB = (global_face1.boundingBox.bottom)
+        val faceL = (global_face1.boundingBox.left)
+        val faceR = (global_face1.boundingBox.right)
+
+//        Toast.makeText(this, "X:$centerX \nY: $centerY " +
+//                "\nT: $faceT\nB: $faceB\nL $faceL\nR $faceR", Toast.LENGTH_LONG).show()
+
+//        var faceBound1 = arrayOf<Array<Color>>()
+//        val boundWidthL = global_face1.boundingBox.width()
+//        val boundHeightL = global_face1.boundingBox.height()
+//
+//        val boundWidthR = global_face2.boundingBox.width()
+//        val boundHeightR = global_face2.boundingBox.height()
+
+        for(x in faceL..faceR) {
+            for (y in faceT..faceB) {
+                val temp1 = bmL.getPixel(x,y)
+                val temp2 = bmR.getPixel(x,y)
+                bmR.setPixel(x, y, temp1)
+                bmL.setPixel(x, y, temp2)
+            }
+        }
+
+        imageViewLeft?.background = BitmapDrawable(resources, bmL)
+        imageViewRight?.background = BitmapDrawable(resources, bmR)
+
+        textView1.text = ("Face Swapped!")
+        textView2.text = ("Face Swapped!")
+
+    }
+
+    private fun processFaceResult(faces: List<FirebaseVisionFace>, stat: Int){
+        Log.d("TAG","runing face process")
+        if (faces.isEmpty()){
+            if(enableBu>0)
+                enableBu--
+            bu_swap.isEnabled = false
+            Toast.makeText(this, "No face detected!!!", Toast.LENGTH_LONG).show()
             return
         }
+        if(stat == 0)
+            global_face1 = faces[0]
+        else global_face2 = faces[0]
 
         val face = faces[0]
         val center_x = (face.boundingBox.centerX().toInt())
         val center_y = (face.boundingBox.centerY().toInt())
+        Toast.makeText(this, "centerX=$center_x \ncenterY=$center_y", Toast.LENGTH_LONG).show()
 
         var leftEyePosX = 0
         var leftEyePosY = 0
+        var RightEyePosX = 0
+        var RightEyePosY = 0
 
         val leftEye = face.getLandmark(FirebaseVisionFaceLandmark.LEFT_EYE)
         leftEye?.let{
             leftEyePosX = leftEye.position.x.toInt()
             leftEyePosY = leftEye.position.y.toInt()
         }
-    }
-*/
+//        Toast.makeText(this, "LEyeX=$leftEyePosX \nLEye=$leftEyePosY", Toast.LENGTH_LONG).show()
 
-    fun bitmapBlur(sentBitmap: Bitmap, scale: Float, radius: Int): Bitmap? {
+        val smileProb:Float
+        val rightEyeOpenProb:Float
+        val leftEyeOpenProb:Float
+
+        var smileCheck = false
+        var leftEyeOpenCheck = false
+        var rightEyeOpenCheck = false
+
+        if(face.smilingProbability != FirebaseVisionFace.UNCOMPUTED_PROBABILITY){
+            smileProb = face.smilingProbability
+            if (smileProb >= 0.7)
+                smileCheck = true
+        }
+
+        if(face.rightEyeOpenProbability != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
+            rightEyeOpenProb = face.rightEyeOpenProbability
+            if (rightEyeOpenProb >= 0.7)
+                rightEyeOpenCheck = true
+        }
+
+        if(face.leftEyeOpenProbability != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
+            leftEyeOpenProb = face.leftEyeOpenProbability
+            if (leftEyeOpenProb >= 0.7)
+                leftEyeOpenCheck = true
+        }
+
+        val textViewL = findViewById<TextView>(R.id.textView1)
+        val textViewR = findViewById<TextView>(R.id.textView2)
+
+        var textView: TextView
+
+        textView = if(stat == 0)
+            textViewL
+        else textViewR
+
+        if (!smileCheck || !rightEyeOpenCheck || !leftEyeOpenCheck) {
+            textView.text = ("smile: " + smileCheck.toString() +
+                    "\nleft eye: " + leftEyeOpenCheck.toString() +
+                    "\nright eye: " + rightEyeOpenCheck.toString() +
+                    "\nPlease retake\nthe picture!")
+        } else {
+            textView.text = ("smile: " + smileCheck.toString() +
+                    "\nleft eye: " + leftEyeOpenCheck.toString() +
+                    "\nright eye: " + rightEyeOpenCheck.toString())
+        }
+
+        enableBu++
+        if(enableBu>=2) {
+            bu_swap.isEnabled = true
+            enableBu=2
+        }
+    }
+
+    private fun bitmapBlur(sentBitmap: Bitmap, scale: Float, radius: Int): Bitmap? {
         var sentBitmap = sentBitmap
         val width = Math.round(sentBitmap.width * scale)
         val height = Math.round(sentBitmap.height * scale)
