@@ -27,7 +27,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 // ******************************
 
 
-
 class MainActivity : AppCompatActivity() , SensorEventListener {
 
     private var gestureClassifier = GestureClassifier(this)
@@ -113,8 +112,6 @@ class MainActivity : AppCompatActivity() , SensorEventListener {
                 ",y:"+capturedData[k-1].toString()+
                 ",z:"+capturedData[k].toString())
 
-
-
         //2. Stop capturing data when we have "enough" samples
       //  if(***condition to stop recording data is satisfied ****){
         counter++
@@ -137,10 +134,11 @@ class MainActivity : AppCompatActivity() , SensorEventListener {
 //        mSensorManager.registerListener(this, mSensor, 40000)
     }
 
-
     fun clear_prediction(view:View){
         result_view.text = ""
         mSensorManager.unregisterListener(this)
+        k = 0
+        counter=0
     }
 
     override fun onDestroy() {
@@ -148,5 +146,17 @@ class MainActivity : AppCompatActivity() , SensorEventListener {
         mSensorManager.unregisterListener(this)
     }
 
+    override fun onPause() {
+        super.onPause()
+        mSensorManager.unregisterListener(this)
+        k = 0
+        counter=0
+    }
 
+    override fun onStop() {
+        super.onStop()
+        mSensorManager.unregisterListener(this)
+        k = 0
+        counter=0
+    }
 }
