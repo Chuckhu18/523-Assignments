@@ -5,16 +5,19 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 
-const val DEVICE_NAME = "0_0_summer_is_comming_0_0"
+//const val DEVICE_NAME = "0_0_summer_is_comming_0_0"
+const val DEVICE_NAME = "bluet"
 
 class MainActivity : AppCompatActivity(), BLEControl.Callback {
 
@@ -28,7 +31,6 @@ class MainActivity : AppCompatActivity(), BLEControl.Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
 
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
@@ -102,8 +104,8 @@ class MainActivity : AppCompatActivity(), BLEControl.Callback {
      * Press button to set the lEDs to color red (see arduino code)
      */
     fun buttRed(v: View) {
-        ble!!.send("red")
-        Log.i("BLE", "SEND RED")
+        ble!!.send("confirm")
+        Log.i("BLE", "SEND Confirm")
     }
 
 
@@ -166,7 +168,47 @@ class MainActivity : AppCompatActivity(), BLEControl.Callback {
      */
     override fun onReceive(ble: BLEControl, rx: BluetoothGattCharacteristic) {
         writeLine("Received value: " + rx.getStringValue(0))
+//        Log.d("TAG", rx.getStringValue(0))
+        if(rx.getStringValue(0) == "Door Opened!!"){
+//            Log.d("TAG", "in doorOpen")
+//            Log.d("TAG", rx.getStringValue(0))
 
+            runOnUiThread {
+                showDialog()
+            }
+        }
+
+    }
+
+    fun showDialog(){
+        Log.d("TAG", "in showDialog")
+        val alertDialog: AlertDialog? = this?.let {
+            val builder = AlertDialog.Builder(it)
+            builder.apply { setPositiveButton(
+                "Cancel Alert",
+                DialogInterface.OnClickListener { dialog, id -> diaClick()
+                    //user press the positive button
+                })
+//            setNegativeButton("Cancel Alert",
+//                DialogInterface.OnClickListener { dialog, id -> diaClick()
+//                    // User cancelled the dialog
+//                })
+            } // Set other dialog properties
+             .setMessage("Do you want to cancel the arlarm")
+             .setTitle("Arduino ALARM")
+            // Create the AlertDialog
+            builder.create()
+        }
+
+        Log.d("TAG", "before show")
+        alertDialog?.show()
+    }
+
+    fun diaClick(){
+        Log.d("TAG", "onClickDig")
+        ble!!.send("cancel")
+        ble!!.send("cancel")
+        ble!!.send("cancel")
     }
 
     companion object {
