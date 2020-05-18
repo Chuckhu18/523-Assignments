@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGattCharacteristic
 import android.content.DialogInterface
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.method.ScrollingMovementMethod
 import android.util.Log
@@ -18,6 +19,7 @@ import androidx.core.app.ActivityCompat
 
 //const val DEVICE_NAME = "0_0_summer_is_comming_0_0"
 const val DEVICE_NAME = "bluet"
+const val EMERGENCY_CONTACT = "2093183388"
 
 class MainActivity : AppCompatActivity(), BLEControl.Callback {
 
@@ -27,6 +29,7 @@ class MainActivity : AppCompatActivity(), BLEControl.Callback {
     private var messages: TextView? = null
     private var rssiAverage:Double = 0.0
 
+    private var digStatus : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +76,9 @@ class MainActivity : AppCompatActivity(), BLEControl.Callback {
     override fun onResume() {
         super.onResume()
         //updateButtons(false)
+        digStatus = false
         ble!!.registerCallback(this)
+
     }
 
     override fun onStop() {
@@ -169,15 +174,25 @@ class MainActivity : AppCompatActivity(), BLEControl.Callback {
     override fun onReceive(ble: BLEControl, rx: BluetoothGattCharacteristic) {
         writeLine("Received value: " + rx.getStringValue(0))
 //        Log.d("TAG", rx.getStringValue(0))
-        if(rx.getStringValue(0) == "Door Opened!!"){
-//            Log.d("TAG", "in doorOpen")
-//            Log.d("TAG", rx.getStringValue(0))
+        if(rx.getStringValue(0) == "doorOpened" && !digStatus){
+            Log.d("TAG", "in doorOpen")
+            Log.d("TAG", rx.getStringValue(0))
 
             runOnUiThread {
                 showDialog()
             }
+            digStatus = true
         }
-
+        if(rx.getStringValue(0) == "noResponse") {
+            digStatus = false
+            try {
+                val uri: String = "tel:" + EMERGENCY_CONTACT
+                val intent = Intent(Intent.ACTION_DIAL, Uri.parse(uri))
+                startActivity(intent)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun showDialog(){
@@ -207,8 +222,7 @@ class MainActivity : AppCompatActivity(), BLEControl.Callback {
     fun diaClick(){
         Log.d("TAG", "onClickDig")
         ble!!.send("cancel")
-        ble!!.send("cancel")
-        ble!!.send("cancel")
+        digStatus = false
     }
 
     companion object {

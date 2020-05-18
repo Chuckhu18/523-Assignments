@@ -47,23 +47,6 @@
             android:onClick="getRSSI"/>
 
         <Button
-            android:id="@+id/greenButt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="buttRed"
-
-            android:text="Confirm" />
-
-        <Button
-            android:id="@+id/tempButt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="buttTouch"
-            android:text="TEMP"        />
-
-        <Button
             android:id="@+id/clearButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
