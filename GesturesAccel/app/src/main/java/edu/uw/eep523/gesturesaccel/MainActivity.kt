@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity() , SensorEventListener {
         //save data into an array to make inference about the gesture
         //pay attention to the units
         //capturedData.set(Whichposition, WhichValue) // repeat for x, y, z
-        if (k >= 128)
+        if (k >= 128*3)
             k = 0
         for(i in 0..2){
             capturedData[k] = linear_acceleration[i] * 1000
@@ -108,9 +108,9 @@ class MainActivity : AppCompatActivity() , SensorEventListener {
             k++
         }
 
-        Log.d(TAG, "k:$k"+ ",x:"+capturedData[k-2].toString()+
-                ",y:"+capturedData[k-1].toString()+
-                ",z:"+capturedData[k].toString())
+//        Log.d(TAG, "k:$k"+ ",x:"+capturedData[k-2].toString()+
+//                ",y:"+capturedData[k-1].toString()+
+//                ",z:"+capturedData[k].toString())
 
         //2. Stop capturing data when we have "enough" samples
       //  if(***condition to stop recording data is satisfied ****){
